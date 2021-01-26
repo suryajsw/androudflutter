@@ -31,7 +31,7 @@ class CartScreen extends StatelessWidget {
                     width: 10,
                   ),
                   Chip(
-                    label: Text('\$${cart.totalamount}'),
+                    label: Text('\$${cart.totalamount.toStringAsFixed(2)}'),
                   ),
                   FlatButton(
                     child: Text(
