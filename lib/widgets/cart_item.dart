@@ -29,6 +29,27 @@ class CartItem extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
       ),
       direction: DismissDirection.endToStart,
+      // ignore: missing_return
+      confirmDismiss: (direct) {
+        return showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('Are u sure'),
+            actions: <Widget>[
+              FlatButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop(false);
+                  },
+                  child: Text('no')),
+              FlatButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop(true);
+                  },
+                  child: Text('yes'))
+            ],
+          ),
+        );
+      },
       onDismissed: (direction) {},
       child: Card(
         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
