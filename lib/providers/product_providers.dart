@@ -49,4 +49,31 @@ class products with ChangeNotifier {
   Product findbyid(String id) {
     return _items.firstWhere((element) => element.id == id);
   }
+
+  void addproduct(Product produc) {
+    final newprod = Product(
+      title: produc.title,
+      description: produc.description,
+      price: produc.price,
+      id: DateTime.now().toString(),
+      imageUrl: produc.imageUrl,
+    );
+    _items.add(newprod);
+    notifyListeners();
+  }
+
+  void updatepro(String id, Product newproduct) {
+    final prodindex = _items.indexWhere((element) => element.id == id);
+    if (prodindex >= 0) {
+      _items[prodindex] = newproduct;
+      notifyListeners();
+    } else {
+      print('hh');
+    }
+  }
+
+  void deletpro(String id) {
+    _items.removeWhere((element) => element.id == id);
+    notifyListeners();
+  }
 }
