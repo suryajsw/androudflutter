@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shop_app/models/http_exception.dart';
 
 import './product.dart';
 
@@ -38,6 +42,11 @@ class products with ChangeNotifier {
     ),
   ];
 
+  final String authToken;
+  final String userId;
+
+  products(this.authToken, this.userId, this._items);
+
   List<Product> get items {
     return [..._items];
   }
@@ -50,21 +59,76 @@ class products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  void addproduct(Product produc) {
-    final newprod = Product(
-      title: produc.title,
-      description: produc.description,
-      price: produc.price,
-      id: DateTime.now().toString(),
-      imageUrl: produc.imageUrl,
-    );
-    _items.add(newprod);
-    notifyListeners();
+  Future<void> fetchproduct() async {
+    var url =
+        'https://flutterproject-5b8e2-default-rtdb.firebaseio.com/products.json?auth=$authToken';
+    try {
+      final responce = await http.get(url);
+      final extractdata = json.decode(responce.body) as Map<String, dynamic>;
+      if (extractdata == null) {
+        return;
+      }
+      url =
+          'https://flutterproject-5b8e2-default-rtdb.firebaseio.com/userfav/$userId.json?auth=$authToken';
+      final favres = await http.get(url);
+      final favdata = json.decode(favres.body);
+      final List<Product> loadedprods = [];
+      extractdata.forEach((prodid, proddata) {
+        loadedprods.add(Product(
+          id: prodid,
+          title: proddata['title'],
+          description: proddata['description'],
+          price: proddata['price'],
+          isfavorite: favdata == null ? false : favdata[prodid] ?? false,
+          imageUrl: proddata['imagurl'],
+        ));
+      });
+      _items = loadedprods;
+      notifyListeners();
+    } catch (error) {
+      throw (error);
+    }
   }
 
-  void updatepro(String id, Product newproduct) {
+  Future<void> addproduct(Product produc) async {
+    final url =
+        'https://flutterproject-5b8e2-default-rtdb.firebaseio.com/products.json?auth=$authToken';
+    try {
+      final responce = await http.post(url,
+          body: json.encode({
+            'title': produc.title,
+            'description': produc.description,
+            'imagurl': produc.imageUrl,
+            'price': produc.price,
+          }));
+      final newprod = Product(
+        title: produc.title,
+        description: produc.description,
+        price: produc.price,
+        id: json.decode(responce.body)['name'],
+        imageUrl: produc.imageUrl,
+      );
+      _items.add(newprod);
+      notifyListeners();
+    } catch (error) {
+      print(error);
+      throw error;
+    }
+  }
+
+  Future<void> updatepro(String id, Product newproduct) async {
     final prodindex = _items.indexWhere((element) => element.id == id);
+
     if (prodindex >= 0) {
+      final url =
+          'https://flutterproject-5b8e2-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken';
+      await http.patch(url,
+          body: json.encode({
+            'title': newproduct.title,
+            'description': newproduct.description,
+            'imagurl': newproduct.imageUrl,
+            'price': newproduct.price,
+          }));
       _items[prodindex] = newproduct;
       notifyListeners();
     } else {
@@ -72,8 +136,19 @@ class products with ChangeNotifier {
     }
   }
 
-  void deletpro(String id) {
-    _items.removeWhere((element) => element.id == id);
+  Future<void> deletpro(String id) async {
+    final url =
+        'https://flutterproject-5b8e2-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken';
+    final existingproindex = _items.indexWhere((prod) => prod.id == id);
+    var existingpro = _items[existingproindex];
+    _items.removeAt(existingproindex);
     notifyListeners();
+    final value = await http.delete(url);
+    if (value.statusCode >= 400) {
+      _items.insert(existingproindex, existingpro);
+      notifyListeners();
+      throw HttpException('could not delet');
+    }
+    existingpro = null;
   }
 }

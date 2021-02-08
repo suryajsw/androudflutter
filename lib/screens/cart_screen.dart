@@ -33,18 +33,7 @@ class CartScreen extends StatelessWidget {
                   Chip(
                     label: Text('\$${cart.totalamount.toStringAsFixed(2)}'),
                   ),
-                  FlatButton(
-                    child: Text(
-                      ('ORDER NOW'),
-                    ),
-                    onPressed: () {
-                      Provider.of<Orderes>(context, listen: false).addOrder(
-                        cart.items.values.toList(),
-                        cart.totalamount,
-                      );
-                      cart.clear();
-                    },
-                  )
+                  Orderbutton(cart),
                 ],
               ),
             ),
@@ -64,6 +53,45 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class Orderbutton extends StatefulWidget {
+  Orderbutton(@required this.cart);
+
+  final Cart cart;
+
+  @override
+  _OrderbuttonState createState() => _OrderbuttonState();
+}
+
+class _OrderbuttonState extends State<Orderbutton> {
+  var _isloading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      child: _isloading
+          ? CircularProgressIndicator()
+          : Text(
+              ('ORDER NOW'),
+            ),
+      onPressed: (widget.cart.totalamount <= 0 || _isloading)
+          ? null
+          : () async {
+              setState(() {
+                _isloading = true;
+              });
+              await Provider.of<Orderes>(context, listen: false).addOrder(
+                widget.cart.items.values.toList(),
+                widget.cart.totalamount,
+              );
+              setState(() {
+                _isloading = false;
+              });
+              widget.cart.clear();
+            },
     );
   }
 }
