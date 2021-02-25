@@ -35,13 +35,15 @@ class _OrderIteState extends State<OrderIte> {
               },
             ),
           ),
+          
           if (_expanded)
             Container(
               height: min(widget.order.products.length * 20.0 + 100, 180),
               child: ListView(
                 children: widget.order.products
                     .map(
-                      (e) => Row(
+                      (e) =>
+                      Row(
                         children: <Widget>[
                           Text(
                             e.title,
@@ -49,7 +51,7 @@ class _OrderIteState extends State<OrderIte> {
                           Text('${e.quantity}x\$${e.price}')
                         ],
                       ),
-                    )
+                )
                     .toList(),
               ),
             ),
