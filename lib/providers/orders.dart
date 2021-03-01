@@ -26,10 +26,10 @@ class Orderes with ChangeNotifier {
   }
 
   Future<void> fetchorder() async {
-    final url =
+    final uri =
         'https://flutterproject-5b8e2-default-rtdb.firebaseio.com/Orders/$userId.json?auth=$authtoken';
 
-    final res = await http.get(url);
+    final res = await http.get(uri);
     final List<OrderItem> loadedoredrs = [];
 
     final extracteddata = json.decode(res.body) as Map<String, dynamic>;
@@ -63,12 +63,14 @@ class Orderes with ChangeNotifier {
           'amount': total,
           'datetime': timestamp.toIso8601String(),
           'products': cartproducts
-              .map((cp) => {
-                    'id': cp.prodid,
-                    'title': cp.title,
-                    'quantity': cp.quantity,
-                    'proce': cp.price,
-                  })
+              .map(
+                (cp) => {
+                  'id': cp.prodid,
+                  'title': cp.title,
+                  'quantity': cp.quantity,
+                  'proce': cp.price,
+                },
+              )
               .toList(),
         }));
     _orders.insert(

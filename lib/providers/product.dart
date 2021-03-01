@@ -12,13 +12,12 @@ class Product with ChangeNotifier {
   final String imageUrl;
   bool isfavorite;
 
-  Product(
-      {@required this.id,
-      @required this.title,
-      @required this.description,
-      @required this.price,
-      @required this.imageUrl,
-      this.isfavorite = false});
+  Product({@required this.id,
+    @required this.title,
+    @required this.description,
+    @required this.price,
+    @required this.imageUrl,
+    this.isfavorite = false});
 
   void _setvalue(bool newvalue) {
     isfavorite = newvalue;
@@ -31,7 +30,7 @@ class Product with ChangeNotifier {
     notifyListeners();
 
     final url =
-        'https://flutterproject-5b8e2-default-rtdb.firebaseio.com/userfav/$userid/$id.json?auth=$token';
+        'https://flutterproject-5b8e2-default-rtdb.firebaseio.com/userfav/$userid/$id.json?auth=$token;
     try {
       final responce = await http.put(url,
           body: json.encode(
